@@ -1,8 +1,12 @@
---extra-index-url https://download.pytorch.org/whl/cu118 
-
+--extra-index-url https://download.pytorch.org/whl/cu118
 torch
 numpy
 datasets
 evaluate
 tqdm
 matplotlib
+absl-py
+nltk
+rouge_score>=0.1.2
+sacrebleu
+six
