@@ -172,3 +172,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ignore folder ./checkpoints and ./temp_notebook
+checkpoints/
+temp_notebook/

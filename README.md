@@ -1,76 +1,113 @@
-# Decoder-Only Transformer for Dialogue Generation
+# Mini Transformer for Dialogue Generation
 
-## Deskripsi Proyek
+Notebook ini mengimplementasikan model **Transformer Seq2Seq** (encoder–decoder) untuk tugas *dialogue generation* menggunakan dataset percakapan sederhana (*simple dialogs*).
 
-Implementasi dari model Transformer *decoder-only* sederhana untuk tugas *multi-turn dialogue generation*. Proyek ini bertujuan untuk memahami dan membangun komponen dasar Transformer dari awal (*from scratch*) tanpa menggunakan library tinggi seperti Huggingface Transformers atau PyTorch Lightning.
+## 1. Deskripsi Proyek
 
-Komponen inti yang diimplementasikan:
+Proyek ini membangun dan melatih model Transformer Seq2Seq dari awal (**tanpa pretrained weights**) untuk menghasilkan respons dialog yang alami berdasarkan input pertanyaan. Model diujikan pada dataset *pasangan tanya–jawab* berformat tab-delimited (`dialogs.txt`).
 
-* Token & Positional Embedding
-* Multi-Head Self-Attention (dengan varian *relative positional bias*)
-* Feed-Forward Network
-* Layer Normalization
-* Residual Connection
+Fitur utama:
 
-## Variants
+* Training **from scratch** (seluruh parameter diinisialisasi acak)
+* Eksperimen dengan 4 varian arsitektur (dengan/ tanpa relative positional bias, ukuran kecil/besar)
+* Evaluasi otomatis menggunakan metrik standar generasi teks
 
-Empat varian model digunakan dalam eksperimen ini:
+## 2. Variants
 
-* `vanilla_small`: Positional encoding absolut, dimensi kecil
-* `vanilla_big`: Positional encoding absolut, dimensi besar
-* `relpos_small`: Menggunakan *MultiHeadSelfAttentionRelPos*, dimensi kecil
-* `relpos_big`: Menggunakan *MultiHeadSelfAttentionRelPos*, dimensi besar
+Empat varian model yang diuji:
 
-Varian `relpos_*` menggunakan attention dengan *relative positional bias* untuk menangani perbedaan posisi token secara lebih fleksibel. Bias ini diimplementasikan dalam kelas `MultiHeadSelfAttentionRelPos` dengan indeks posisi relatif dan parameter bias learnable per head.
+* **vanilla\_small**: model kecil, tanpa relative positional bias
+* **vanilla\_big**: model besar, tanpa relative positional bias
+* **relpos\_small**: model kecil, *dengan* relative positional bias
+* **relpos\_big**: model besar, *dengan* relative positional bias
 
-## Dataset
+Perbedaan utama: jumlah parameter, ukuran dimensi, serta penggunaan *relative position bias* pada attention.
 
-**DailyDialog** dari Huggingface Datasets
+## 3. Dataset
 
-* Link: [https://huggingface.co/datasets/li2017dailydialog/daily\_dialog](https://huggingface.co/datasets/li2017dailydialog/daily_dialog)
-* Dialog sehari-hari yang ditulis manusia dan disertai label intent (dialogue act) dan emosi.
+Dataset yang digunakan adalah *Simple Dialogs for Chatbot* (Kaggle):
 
-### Statistik Dataset
+* Link: [https://www.kaggle.com/datasets/grafstor/simple-dialogs-for-chatbot](https://www.kaggle.com/datasets/grafstor/simple-dialogs-for-chatbot)
 
-| Split      | #Dialogues | Avg Turns/Dialog | Avg Tokens/Turn |
-| ---------- | ---------- | ---------------- | --------------- |
-| Train      | 11,118     | 7.84             | \~15            |
-| Validation | 1,000      | 8.07             | \~15            |
-| Test       | 1,000      | 7.74             | \~15            |
+Format file `dialogs.txt`:
+Setiap baris berisi satu pasangan `<pertanyaan> \t <jawaban>`, contoh:
 
-## Struktur Direktori
+```
+hi, how are you doing?    i'm fine. how about yourself?
+i'm fine. how about yourself?    i'm pretty good. thanks for asking.
+...
+```
+
+**Statistik Dataset:**
+
+| Split | # Dialogues | Max Turns/Dialog | Avg Tokens/Turn |
+| ----- | ----------- | ---------------- | --------------- |
+| Train | \~3,500     | 1                | \~8–12          |
+| Test  | \~200       | 1                | \~8–12          |
+
+* Total dialogs: **3725**
+* Subset train/test dipilih sesuai kebutuhan eksperimen
+
+## 4. Struktur Direktori
 
 ```
 .
-├── requirements.txt
-├── notebook.ipynb            # Main implementation in notebook
+├── dialogs.txt         # Dataset: simple dialogs (tab-delimited)
+├── notebook.ipynb      # Notebook eksperimen (end-to-end)
+├── requirements.txt    # Daftar dependensi Python
+├── checkpoints/        # Folder hasil checkpoint model (*.pt)
+└── ... (file terkait lainnya)
 ```
 
-## Instalasi & Eksekusi
+## 5. Instalasi & Eksekusi
 
-1. Install dependencies:
+1. **Install dependencies:**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-2. Jalankan seluruh cell pada `notebook.ipynb` untuk memulai pelatihan dan evaluasi model.
+2. **Jalankan seluruh cell di `notebook.ipynb`** untuk:
 
-## Evaluasi
+   * Exploratory Data Analysis (EDA)
+   * Preprocessing data & pembuatan vocab
+   * Training model, validasi, dan penyimpanan checkpoint
+   * Inference dan evaluasi otomatis
 
-Model dievaluasi dengan metrik:
+## 6. Evaluasi
 
-* ROUGE (rouge1, rouge2, rougeL, rougeLsum)
-* BLEU
-* METEOR
+Model dievaluasi pada test set menggunakan metrik:
 
-Metrik ini menghitung kedekatan antara respons model dan respons referensi dalam dialog test set.
+* **ROUGE** (rouge-1, rouge-2, rouge-L, rouge-Lsum)
+* **BLEU**
+* **METEOR**
 
-## Catatan Tambahan
+Metrik ini mengukur kemiripan respons model dengan jawaban referensi (semakin tinggi = semakin mirip).
 
-* Notebook menggunakan subset data dengan maksimal 8 turn per dialog.
-* Ukuran token maksimal (`MAX_SEQ_LEN`) diatur ke 64.
-* Implementasi tidak menggunakan model pretrained, seluruh parameter diinisialisasi dari nol.
+## 7. Catatan Penting
+
+* Model di-*train* dari nol, **tanpa pretrained weights**.
+* Sequence input/output dibatasi hingga `MAX_SEQ_LEN=64` token.
+* Notebook otomatis menampilkan *loss curves*, perbandingan model, skor metrik, serta contoh hasil prediksi.
+* Checkpoint model terbaik otomatis disimpan ke folder `checkpoints/`.
 
 ---
 
+**Referensi utama:**
+
+* Vaswani et al., "Attention Is All You Need" (2017)
+* [Kaggle: Simple Dialogs for Chatbot](https://www.kaggle.com/datasets/grafstor/simple-dialogs-for-chatbot)
+
+---
+
+**Contoh isi file `dialogs.txt`:**
+
+```
+hi, how are you doing?    i'm fine. how about yourself?
+i'm fine. how about yourself?    i'm pretty good. thanks for asking.
+...
+```
+
+---
+
+**Total dialogs: 3725**

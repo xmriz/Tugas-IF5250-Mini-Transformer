@@ -10,3 +10,6 @@ nltk
 rouge_score>=0.1.2
 sacrebleu
 six
+nbformat
+plotly
+wordcloud
