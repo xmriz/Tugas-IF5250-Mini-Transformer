@@ -96,6 +96,7 @@ Metrik ini mengukur kemiripan respons model dengan jawaban referensi (semakin ti
 **Referensi utama:**
 
 * Vaswani et al., "Attention Is All You Need" (2017)
+* Shaw et al., "Self-Attention with Relative Position Representations" (2018)
 * [Kaggle: Simple Dialogs for Chatbot](https://www.kaggle.com/datasets/grafstor/simple-dialogs-for-chatbot)
 
 ---
